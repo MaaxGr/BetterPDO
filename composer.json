@@ -1,0 +1,13 @@
+{
+  "name": "maaxgr/betterpdo",
+  "type": "project",
+  "autoload": {
+    "files": [
+      "src/autoload.php"
+    ]
+  },
+  "require": {
+    "ext-json": "*",
+    "ext-pdo": "*"
+  }
+}
