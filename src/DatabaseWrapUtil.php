@@ -25,12 +25,13 @@ class DatabaseWrapUtil {
             foreach ($assocData as $key => $value) {
                 $fieldName = self::snakeToPascalCase($key);
 
-                $property = $clazz->getProperty($fieldName);
+                $property = self::findPropertyByName($clazz, $fieldName);
 
                 if ($property != null) {
                     $property->setAccessible(true);
                     $property->setValue($instance, $value);
                 }
+
             }
 
             return $instance;
@@ -41,5 +42,26 @@ class DatabaseWrapUtil {
 
     private static function snakeToPascalCase($target) {
         return str_replace('_', '', ucwords($target, '_'));
+    }
+
+    private static function findPropertyByName(ReflectionClass $clazz, string $name) {
+        $lcName = strtolower($name);
+
+        foreach ($clazz->getProperties() as $property) {
+
+            $lcPropName = strtolower($property->name);
+
+            //try with same name
+            if ($lcName == $lcPropName) {
+                return $property;
+            }
+
+            //try without underscores
+            if (str_replace('_', '', $lcName) == str_replace('_', '', $lcPropName)) {
+                return $property;
+            }
+        }
+
+        return null;
     }
 }

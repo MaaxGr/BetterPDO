@@ -5,7 +5,8 @@ namespace gr\maax\betterpdo;
 use PDO;
 use PDOStatement;
 
-class BetterStatement {
+class BetterStatement
+{
 
     /** @var PDO $server */
     private $pdo;
@@ -16,12 +17,25 @@ class BetterStatement {
     /** @var bool $executed */
     private $executed = false;
 
-    function __construct($pdo, $sql) {
+    private $success = null;
+
+    //error code in ansi standard
+    private $errorCodeAnsi = null;
+
+    //driver specific error code
+    private $errorCode = null;
+
+    //driver specific error code
+    private $errorMessage = null;
+
+    function __construct($pdo, $sql)
+    {
         $this->pdo = $pdo;
         $this->statement = $this->pdo->prepare($sql);
     }
 
-    public function addParam($param, $value) {
+    public function addParam($param, $value)
+    {
         $stmt = $this->statement;
 
         if (is_bool($value)) {
@@ -34,28 +48,64 @@ class BetterStatement {
         return $this;
     }
 
-    public function bindParam($param, $value) {
-        return $this->addParam($param, $value);
-    }
-
-    public function execute($array = null) {
+    public function execute()
+    {
         $this->executed = true;
-        $this->statement->execute($array);
+        $this->success = $this->statement->execute();
+
+        $errorInfo = $this->statement->errorInfo();
+
+        $this->errorCodeAnsi = $errorInfo[0];
+        $this->errorCode = $errorInfo[1];
+        $this->errorMessage = $errorInfo[2];
+
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isExecuted(): bool {
+    public function isExecuted(): bool
+    {
         return $this->executed;
     }
 
-    public function getInsertedId() {
+    public function getSuccess(): bool
+    {
+        if (!isset($this->success)) {
+            throw new BetterPdoException('Statement not executed yet!');
+        }
+        return $this->success;
+    }
+
+    public function getErrorCodeAnsi()
+    {
+        if (!isset($this->success)) {
+            throw new BetterPdoException('Statement not executed yet!');
+        }
+        return $this->errorCodeAnsi;
+    }
+
+    public function getErrorCode()
+    {
+        if (!isset($this->success)) {
+            throw new BetterPdoException('Statement not executed yet!');
+        }
+        return $this->errorCode;
+    }
+
+    public function getErrorMessage()
+    {
+        if (!isset($this->success)) {
+            throw new BetterPdoException('Statement not executed yet!');
+        }
+        return $this->errorMessage;
+    }
+
+    public function getInsertedId()
+    {
         return $this->pdo->lastInsertId();
     }
 
-    public function fetch($fetchStyle, $extraParam = null) {
+    public function fetch($fetchStyle, $extraParam = null)
+    {
         if (!$this->isExecuted()) {
             $this->execute();
         }
@@ -79,7 +129,8 @@ class BetterStatement {
         return $this->statement->fetch($fetchStyle);
     }
 
-    public function fetchAll($fetchStyle, $extraParam = null) {
+    public function fetchAll($fetchStyle, $extraParam = null)
+    {
         if (!$this->isExecuted()) {
             $this->execute();
         }
