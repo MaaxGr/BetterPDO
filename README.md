@@ -1,4 +1,4 @@
-# BetterPDO (alpha)
+# BetterPDO
 Optimized sql libary for php! (currently only for MySQL)
 
 With that libary, you can **save a lot of time, lines of code and spare nerves**!
